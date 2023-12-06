@@ -1,5 +1,6 @@
 import sys
 import gi
+from lifxlan import LifxLAN as LLAN
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -11,14 +12,19 @@ class MainWindow(Gtk.ApplicationWindow):
         super().__init__(*args, **kwargs)
 
         self.set_default_size(600, 250)
-        self.set_title("Stocker")
+        self.set_title("Luminaire")
+
+        self.lan = LLAN()
 
         self.box1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.box2 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.box3 = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
 
-        self.button = Gtk.Button(label="Hello!")
-        self.button.connect("clicked", self.hello)
+        self.button = Gtk.Button(label="Power On All")
+        self.button.connect("clicked", self.powerOnAll)
+
+        self.button2 = Gtk.Button(label="Power Off All")
+        self.button2.connect("clicked", self.powerOffAll)
 
         self.set_child(self.box1)  # Horizontal box to window
         self.box1.append(self.box2)  # Put vert box in that box
@@ -26,22 +32,26 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.box2.append(
             self.button
-        )  # Put button in the first of the two vertial boxes
-        self.check = Gtk.CheckButton(label="And goodbye?")
-        self.box2.append(self.check)
-    
+        )
+        
+        self.box2.append(
+            self.button2
+        )
+
         self.switchbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.switch = Gtk.Switch()
         self.switch.set_active(True)
-    
-    def hello(self, button):
-        print("Hello, world!")
-        if self.check.get_active():
-            print("Checked!")
-            self.close()
+
+    def powerOnAll(self, button):
+
+        self.lan.set_power_all_lights(True, 0)
+
+    def powerOffAll(self, button):
+
+        self.lan.set_power_all_lights(False, 0)
 
 
-class MyApp(Adw.Application):
+class Luminaire(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connect("activate", self.on_activate)
@@ -51,5 +61,5 @@ class MyApp(Adw.Application):
         self.win.present()
 
 
-app = MyApp(application_id="com.example.GtkApplication")
+app = Luminaire(application_id="us.tedha.Luminaire")
 app.run(sys.argv)
